@@ -820,17 +820,14 @@ class CheckIDRequest(OpenIDRequest):
                     normalized_request_identity = urinorm(self.identity)
                     normalized_answer_identity = urinorm(identity)
 
+                    # if identity has been changed, ensure that we don't
+                    # send back the same claimed_id.
                     if (normalized_request_identity !=
-                        normalized_answer_identity):
-                        raise ValueError(
-                            "Request was for identity %r, cannot reply "
-                            "with identity %r" % (self.identity, identity))
+                            normalized_answer_identity) and not claimed_id:
+                        claimed_id = identity
 
-                # The "identity" value in the response shall always be
-                # the same as that in the request, otherwise the RP is
-                # likely to not validate the response.
-                response_identity = self.identity
-                response_claimed_id = self.claimed_id
+                response_identity = identity or self.identity
+                response_claimed_id = claimed_id or self.claimed_id
             else:
                 if identity:
                     raise ValueError(
